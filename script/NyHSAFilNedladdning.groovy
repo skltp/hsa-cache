@@ -9,7 +9,6 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.xml.sax.SAXException
 import se.skl.tp.hsa.cache.HsaFileVerifierImpl
 
 import javax.mail.Message
@@ -18,7 +17,6 @@ import javax.mail.Transport
 import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import javax.net.ssl.*
-import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.security.KeyStore
 import java.text.SimpleDateFormat
@@ -65,7 +63,7 @@ if (this.args.size() > 0) {
 }
 
 try {
-    //downloadHSAFilesFromServer()
+    downloadHSAFilesFromServer()
     File hsaFile = unzipFilesToDir()[0]
     validateHSAFileAndChangeSymlink(hsaFile)
     resetHSACache()
@@ -84,16 +82,16 @@ private static void changeSymlinksToHSAFiles(File hsaFile) {
     File tmpFile = new File(tmpFilePath)
 
     if (symlinkFile.exists()) {
-        Files.move(symlinkFile.toPath(), tmpFile.toPath())
+        Files.move(symlinkFile.toPath(), tmpFile.toPath()) //flyttar symlink-filen till tmp
     }
 
     try {
         Files.createSymbolicLink(symlinkFile.toPath(), hsaFile.toPath());
     } catch (Exception e) {
-        Files.move(tmpFile.toPath(), symlinkFile.toPath())
+        Files.move(tmpFile.toPath(), symlinkFile.toPath()) //flyttar symlink-filen tillbaka
         throw e;
     }
-    Files.deleteIfExists(tmpFile.toPath())
+    Files.deleteIfExists(tmpFile.toPath())  //tar bort tmp
     logger.info("Symlink för hsa-filen uppdaterad till " + hsaFile.absolutePath)
 }
 
@@ -143,15 +141,16 @@ private static validateHSAFileAndChangeSymlink(File hsaFile) {
     logger.info("Det är {} skillnader mellan gammal och ny hsa fil.", diff)
 
     int allowableDiff = Integer.parseInt(appProperties.getProperty("allowable.diff.hsa.file"))
-    if(diff > allowableDiff) {
-        throw new HSAException("Fel under validering. Antalet skillnader mellan ny och gammal hsa fil är "+ diff + ". Max antal tillåtna är "+ allowableDiff)
+    if (diff > allowableDiff) {
+        throw new HSAException("Fel under validering. Antalet skillnader mellan ny och gammal hsa fil är " + diff + ". Max antal tillåtna är " + allowableDiff)
     }
 
     changeSymlinksToHSAFiles(hsaFile)
 }
 
 private static Properties downloadProperties() {
-    File propertiesFile = new File('resources/application.properties')
+    String propertiesFileName = System.getProperty("hsa.skript.config")
+    File propertiesFile = new File(propertiesFileName)
     logger.debug("Load properties from file " + propertiesFile.absolutePath)
 
     Properties properties = new Properties()
