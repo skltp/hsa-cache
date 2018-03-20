@@ -118,17 +118,25 @@ private static File[] unzipFilesToDir() {
 }
 
 private static File createUniqueHsaFile(String fileName, String destDir) {
+    String fileNameWithDate = addCurrentDateToFileName(fileName)
+    return addIndexIfFileExist(fileNameWithDate, destDir)
+}
+
+private static String addCurrentDateToFileName(String fileName){
     int dotIndex = fileName.lastIndexOf(".")
     String date = new SimpleDateFormat("_yyyyMMdd").format(new Date())
-    String name = fileName.substring(0, dotIndex) + date + fileName.substring(dotIndex, fileName.size())
-    def currentFile = new File(destDir, name)
+    return fileName.substring(0, dotIndex) + date + fileName.substring(dotIndex, fileName.size())
+}
+
+private static File addIndexIfFileExist(String fileName, String destDir){
+    int dotIndex = fileName.lastIndexOf(".")
+    def currentFile = new File(destDir, fileName)
     int i = 0
     while (currentFile.exists()) {
-        name = fileName.substring(0, dotIndex) + "(" + i++ + ")" + fileName.substring(dotIndex, fileName.size())
+        def name = fileName.substring(0, dotIndex) + "(" + i++ + ")" + fileName.substring(dotIndex, fileName.size())
         currentFile = new File(destDir, name)
     }
-
-    return currentFile
+    return currentFile;
 }
 
 private static validateHSAFileAndChangeSymlink(File hsaFile) {
