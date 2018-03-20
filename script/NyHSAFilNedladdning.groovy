@@ -276,13 +276,40 @@ private static void sendMail(MimeMessage msg) {
 
 }
 
-private static void resetHSACache() {
-    def resetCacheURL = appProperties.getProperty("reset.HSA.cache.url")
-    def result = new URL(resetCacheURL).text
-    logger.info(result)
+private static List<String> getVPServerUrls() {
+    List<String> urls = new ArrayList<>();
+    String url = appProperties.getProperty("reset.HSA.cache.url")
+    if(url != null && !url.isEmpty()){
+        urls.add(url);
+    }
 
-    if (!result.contains("Successfully reset HSA cache")) {
-        throw new HSAException(result)
+    int index=1;
+    while(true){
+        url = appProperties.getProperty("reset.HSA.cache.url."+index);
+        if(url != null && !url.isEmpty()){
+            urls.add(url);
+        } else {
+            break;
+        }
+        index++;
+    }
+    urls
+}
+
+
+private static void resetHSACache() {
+    List<String> urls = getVPServerUrls();
+    if(urls.isEmpty()){
+        throw new HSAException("No VP servers to reset configured");
+    }
+
+    for(url in urls) {
+        def result = new URL(url).text
+        logger.info("Reset on '"+ url + "' returns:\n" + result)
+
+        if (!result.contains("Successfully reset HSA cache")) {
+            throw new HSAException(result)
+        }
     }
 }
 
