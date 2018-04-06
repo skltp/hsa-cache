@@ -153,6 +153,10 @@ private static validateHSAFileAndChangeSymlink(File hsaFile) {
         throw new HSAException("Fel under validering. Antalet skillnader mellan ny och gammal hsa fil är " + diff + ". Max antal tillåtna är " + allowableDiff)
     }
 
+    String date = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(verifier.getCreationDate())
+    logger.info("HSA filen {} är skapad  {}", hsaFile.name ,date)
+
+
     changeSymlinksToHSAFiles(hsaFile)
 }
 

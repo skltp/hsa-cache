@@ -110,7 +110,7 @@ public class HsaFileParser {
 					String tagName =  startElement.getName().getLocalPart();
 
 					// When we hit a <endDate> tag
-					if (ELEMENT_NAME_CREATION_DATE.equals(tagName)) {
+					if (ELEMENT_NAME_CREATION_DATE.equals(tagName) && hsaDataFromFile.getHsaFileCreationDate() == null) {
 						hsaDataFromFile.setHsaFileCreationDate(getCharactersToEndTag(eventReader, ELEMENT_NAME_CREATION_DATE ));
 						continue;
 					}
