@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -12,20 +10,22 @@
 
     <groupId>se.skltp.hsa-cache</groupId>
     <artifactId>hsa-cache</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-RC1</version>
 
     <properties>
         <mule.version>3.7.0</mule.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-cli.version>1.3.1</commons-cli.version>
         <spring-context.version>4.1.6.RELEASE</spring-context.version>
+		<!-- Turn off strict checking of javadoc tags for Java 8 -->
+        <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
 
     <scm>
         <url>http://github.com/skltp/hsa-cash</url>
         <connection>scm:git:git://github.com/skltp/hsa-cash.git</connection>
         <developerConnection>scm:git:git://github.com/skltp/hsa-cash.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.0-RC1</tag>
     </scm>
 
     <distributionManagement>
