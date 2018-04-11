@@ -67,6 +67,51 @@
     </dependencies>
 
     <build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.mycila.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.10.b1</version>
+					<configuration>
+						<properties>
+							<year>2013</year>
+							<copyright>Center for eHalsa i samverkan (CeHis).
+							&lt;http://cehis.se/&gt;</copyright>
+							<product>SKLTP</product>
+						</properties>
+						<strictCheck>true</strictCheck>
+						<basedir>${basedir}</basedir>
+						<header>https://raw.githubusercontent.com/skltp/license/develop/header.txt</header>
+						<encoding>UTF-8</encoding>
+						<includes>
+							<include>src/main/**</include>
+							<include>src/test/**</include>
+						</includes>
+						<excludes>
+							<exclude>**/*.xsd</exclude>
+							<exclude>**/*.wsdl</exclude>
+							<exclude>**/*.xml</exclude>
+							<exclude>**/*.dtd</exclude>
+							<exclude>**/*.jks</exclude>
+							<exclude>**/*.pem</exclude>
+							<exclude>**/*.sh</exclude>
+							<exclude>src/test/java/org/mule/util/**</exclude>
+						</excludes>
+						<useDefaultExcludes>true</useDefaultExcludes>
+						<mapping>
+							<tag>DYNASCRIPT_STYLE</tag>
+						</mapping>
+						<useDefaultMapping>true</useDefaultMapping>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>2.7.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -81,10 +126,37 @@
                     </execution>
                 </executions>
             </plugin>
+			<plugin>
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+			</plugin>
         </plugins>
     </build>
 
     <profiles>
+		<profile>
+			<id>license</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.mycila.maven-license-plugin</groupId>
+						<artifactId>maven-license-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>check</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
         <profile>
             <id>validate</id>
             <build>
