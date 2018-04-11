@@ -27,7 +27,7 @@ import java.util.zip.ZipFile
         @Grab(group = 'com.sun.mail', module = 'javax.mail', version = '1.6.1'),
         @Grab(group = 'commons-beanutils', module = 'commons-beanutils', version = '1.9.3'),
         @Grab(group = 'ch.qos.logback', module = 'logback-classic', version = '1.2.3'),
-        @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.0-SNAPSHOT'),
+        @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.0.0-RC1'),
         @GrabConfig(systemClassLoader = true)
 ])
 
