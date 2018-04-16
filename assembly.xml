@@ -8,15 +8,7 @@
    <fileSets>
     <fileSet>
       <directory>${project.basedir}/script</directory>
-      <outputDirectory>/script</outputDirectory>
+      <outputDirectory>/</outputDirectory> 
     </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/target</directory>
-      <outputDirectory>/jar</outputDirectory>
-        <includes>
-            <include>*-${version}.jar</include>
-        </includes>
-    </fileSet>
-
   </fileSets>
 </assembly>
