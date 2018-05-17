@@ -18,6 +18,7 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import javax.net.ssl.*
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.security.KeyStore
 import java.text.SimpleDateFormat
 import java.util.zip.ZipFile
@@ -73,8 +74,8 @@ try {
 }
 
 
+
 private static void changeSymlinksToHSAFiles(File hsaFile) {
-    logger.info("Nuvarande hsa link är " + getCurrentHSAFile())
     def symlink = appProperties.getProperty("hsa.symlink.file")
     def symlinkFile = new File(symlink)
 
@@ -122,13 +123,13 @@ private static File createUniqueHsaFile(String fileName, String destDir) {
     return addIndexIfFileExist(fileNameWithDate, destDir)
 }
 
-private static String addCurrentDateToFileName(String fileName){
+private static String addCurrentDateToFileName(String fileName) {
     int dotIndex = fileName.lastIndexOf(".")
     String date = new SimpleDateFormat("_yyyyMMdd").format(new Date())
     return fileName.substring(0, dotIndex) + date + fileName.substring(dotIndex, fileName.size())
 }
 
-private static File addIndexIfFileExist(String fileName, String destDir){
+private static File addIndexIfFileExist(String fileName, String destDir) {
     int dotIndex = fileName.lastIndexOf(".")
     def currentFile = new File(destDir, fileName)
     int i = 0
@@ -145,19 +146,28 @@ private static validateHSAFileAndChangeSymlink(File hsaFile) {
 
     verifier.validateFileAgainstXSD()
 
-    int diff = verifier.hsaCacheDiff(getCurrentHSAFile())
+    try {
+        validateAgainstCurrentHSAFile(verifier)
+    } catch (NoSuchFileException e) {
+        logger.info("Det finns ingen nuvarande hsa fil.")
+    }
+
+    String date = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(verifier.getCreationDate())
+    logger.info("HSA filen {} är skapad  {}", hsaFile.name, date)
+
+    changeSymlinksToHSAFiles(hsaFile)
+}
+
+private static void validateAgainstCurrentHSAFile(HsaFileVerifierImpl verifier) {
+    String currentHsaFile = getCurrentHSAFile()
+    logger.info("Nuvarande hsa link är " + currentHsaFile)
+    int diff = verifier.hsaCacheDiff(currentHsaFile)
     logger.info("Det är {} skillnader mellan gammal och ny hsa fil.", diff)
 
     int allowableDiff = Integer.parseInt(appProperties.getProperty("allowable.diff.hsa.file"))
     if (diff > allowableDiff) {
         throw new HSAException("Fel under validering. Antalet skillnader mellan ny och gammal hsa fil är " + diff + ". Max antal tillåtna är " + allowableDiff)
     }
-
-    String date = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(verifier.getCreationDate())
-    logger.info("HSA filen {} är skapad  {}", hsaFile.name ,date)
-
-
-    changeSymlinksToHSAFiles(hsaFile)
 }
 
 private static Properties downloadProperties() {
@@ -291,14 +301,14 @@ private static void sendMail(MimeMessage msg) {
 private static List<String> getVPServerUrls() {
     List<String> urls = new ArrayList<>();
     String url = appProperties.getProperty("reset.HSA.cache.url")
-    if(url != null && !url.isEmpty()){
+    if (url != null && !url.isEmpty()) {
         urls.add(url);
     }
 
-    int index=1;
-    while(true){
-        url = appProperties.getProperty("reset.HSA.cache.url."+index);
-        if(url != null && !url.isEmpty()){
+    int index = 1;
+    while (true) {
+        url = appProperties.getProperty("reset.HSA.cache.url." + index);
+        if (url != null && !url.isEmpty()) {
             urls.add(url);
         } else {
             break;
@@ -311,13 +321,13 @@ private static List<String> getVPServerUrls() {
 
 private static void resetHSACache() {
     List<String> urls = getVPServerUrls();
-    if(urls.isEmpty()){
+    if (urls.isEmpty()) {
         throw new HSAException("No VP servers to reset configured");
     }
 
-    for(url in urls) {
+    for (url in urls) {
         def result = new URL(url).text
-        logger.info("Reset on '"+ url + "' returns:\n" + result)
+        logger.info("Reset on '" + url + "' returns:\n" + result)
 
         if (!result.contains("Successfully reset HSA cache")) {
             throw new HSAException(result)
