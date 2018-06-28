@@ -20,9 +20,12 @@
  */
 package se.skl.tp.hsa.cache;
 
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.List;
 
+@Component
 public interface HsaCache {
 	
 	/**
@@ -66,9 +69,8 @@ public interface HsaCache {
 	 * @param hsaId the HSA-ID
 	 * @return parent HSA-ID
 	 * 
-	 * @throws HsaCacheInitializationException if the cache has not been initialized
 	 */
-	String getParent(String hsaId) throws HsaCacheInitializationException;
+	String getParent(String hsaId);
 	
 	/**
 	 * Get the children HSA-ID for a specific HSA-ID
