@@ -31,6 +31,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Implementation of {@link HsaCache}.
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author par.wenaker@callistaenterprise.se
  *
  */
+@Component
 public class HsaCacheImpl implements HsaCache {
 
 	/**
