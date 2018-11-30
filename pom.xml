@@ -16,9 +16,9 @@
     </properties>
 
     <scm>
-        <url>http://github.com/skltp/hsa-cash</url>
-        <connection>scm:git:https://github.com/skltp/hsa-cash.git</connection>
-        <developerConnection>scm:git:https://github.com/skltp/hsa-cash.git</developerConnection>
+        <url>http://github.com/skltp/hsa-cache</url>
+        <connection>scm:git:https://github.com/skltp/hsa-cache.git</connection>
+        <developerConnection>scm:git:https://github.com/skltp/hsa-cache.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
