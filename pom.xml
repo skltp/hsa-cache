@@ -17,22 +17,22 @@
 
     <scm>
         <url>http://github.com/skltp/hsa-cash</url>
-        <connection>scm:git:git://github.com/skltp/hsa-cash.git</connection>
-        <developerConnection>scm:git:git://github.com/skltp/hsa-cash.git</developerConnection>
+        <connection>scm:git:https://github.com/skltp/hsa-cash.git</connection>
+        <developerConnection>scm:git:https://github.com/skltp/hsa-cash.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
-        <repository>
-            <id>basefarm-nexus</id>
-            <name>SKLTP-Releases</name>
-            <url>http://ine-dib-nexus1.in1.sth.basefarm.net:8081/repository/SKLTP-Releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>basefarm-nexus</id>
-            <name>SKLTP-Snapshots</name>
-            <url>http://ine-dib-nexus1.in1.sth.basefarm.net:8081/repository/SKLTP-Snapshots/</url>
-        </snapshotRepository>
+      <repository>
+        <id>release-nexus</id>
+        <name>Release Nexus</name>
+        <url>${releases-nexus-url}</url>
+      </repository>
+      <snapshotRepository>
+        <id>snapshot-nexus</id>
+        <name>Snapshot Nexus</name>
+        <url>${snapshot-nexus-url}</url>
+      </snapshotRepository>
     </distributionManagement>
 
     <dependencies>
