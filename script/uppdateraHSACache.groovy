@@ -265,38 +265,32 @@ private static void downloadHSAFilesFromServer() {
 }
 
 private static void sendProblemMail(Exception e) {
+    if (!Boolean.parseBoolean(appProperties.getProperty("send.mail"))) {
+        logger.info("Mailalert om problem med hsa uppdatering är avstängd!")
+        return
+    }
+
     Session session = Session.getDefaultInstance(appProperties)
     MimeMessage msg = new MimeMessage(session)
+
     def text = appProperties.getProperty("alert.mail.text")
     msg.setText(String.format(text, ExceptionUtils.getStackTrace(e)));
 
-    sendMail(msg)
-
-}
-
-private static void sendMail(MimeMessage msg) {
-    if (!Boolean.parseBoolean(appProperties.getProperty("send.mail"))) return
-
-    def host = appProperties.getProperty("mail.smtp.host")
-    def port = Integer.parseInt(appProperties.getProperty("mail.smtp.port"))
-    def login = appProperties.getProperty("mail.smtp.login")
-    def password = appProperties.getProperty("mail.smtp.password")
-    def recipient = appProperties.getProperty("to.mail")
     def subject = appProperties.getProperty("alert.mail.subject")
-
     msg.setSubject(subject)
+
+    def login = appProperties.getProperty("mail.smtp.login")
     msg.setFrom(new InternetAddress(login))
+
+    def recipient = appProperties.getProperty("to.mail")
     msg.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient))
 
-    Session session = Session.getDefaultInstance(appProperties)
-    Transport transport = session.getTransport("smtps")
-    transport.connect(host, port, login, password)
-    transport.sendMessage(msg, msg.getAllRecipients())
-    transport.close()
+    Transport.send(msg);
 
     logger.info("Mail skickad till support {}'", recipient)
 
 }
+
 
 private static List<String> getVPServerUrls() {
     List<String> urls = new ArrayList<>();
