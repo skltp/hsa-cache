@@ -243,7 +243,7 @@ private static void downloadHSAFilesFromServer() {
 
     SSLContext sslContext = SSLContext.getInstance("TLS")
     sslContext.init(keyManagers, trustManagers, null)
-    String[] supportedProtocols = ["TLSv1"].toArray()
+    String[] supportedProtocols = ["TLSv1.2"].toArray()
     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, supportedProtocols, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier())
     CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build()
 
