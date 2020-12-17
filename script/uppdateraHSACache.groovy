@@ -28,6 +28,7 @@ import java.util.zip.ZipFile
         @Grab(group = 'com.sun.mail', module = 'javax.mail', version = '1.6.1'),
         @Grab(group = 'commons-beanutils', module = 'commons-beanutils', version = '1.9.3'),
         @Grab(group = 'ch.qos.logback', module = 'logback-classic', version = '1.2.3'),
+        @Grab(group = 'net.logstash.logback', module = 'logstash-logback-encoder', version='6.4'),
         @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.0.1'),
         @GrabConfig(systemClassLoader = true)
 ])
@@ -72,7 +73,6 @@ try {
     logger.error("", e)
     sendProblemMail(e)
 }
-
 
 
 private static void changeSymlinksToHSAFiles(File hsaFile) {
@@ -241,7 +241,7 @@ private static void downloadHSAFilesFromServer() {
     keyManagers[0] = x509KeyManager
 
 
-    SSLContext sslContext = SSLContext.getInstance("TLS")
+    SSLContext sslContext = SSLContext.getInstance("TLSv1.2")
     sslContext.init(keyManagers, trustManagers, null)
     String[] supportedProtocols = ["TLSv1.2"].toArray()
     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, supportedProtocols, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier())
@@ -270,25 +270,29 @@ private static void sendProblemMail(Exception e) {
         return
     }
 
-    Session session = Session.getDefaultInstance(appProperties)
-    MimeMessage msg = new MimeMessage(session)
+    try {
+        Session session = Session.getInstance(appProperties)
 
-    def text = appProperties.getProperty("alert.mail.text")
-    msg.setText(String.format(text, ExceptionUtils.getStackTrace(e)));
+        MimeMessage msg = new MimeMessage(session)
 
-    def subject = appProperties.getProperty("alert.mail.subject")
-    msg.setSubject(subject)
+        def text = appProperties.getProperty("alert.mail.text")
+        msg.setText(String.format(text, ExceptionUtils.getStackTrace(e)));
 
-    def login = appProperties.getProperty("mail.smtp.login")
-    msg.setFrom(new InternetAddress(login))
+        def subject = appProperties.getProperty("alert.mail.subject")
+        msg.setSubject(subject)
 
-    def recipient = appProperties.getProperty("to.mail")
-    msg.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient))
+        def login = appProperties.getProperty("mail.smtp.login")
+        msg.setFrom(new InternetAddress(login))
 
-    Transport.send(msg);
+        def recipient = appProperties.getProperty("to.mail")
+        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient))
 
-    logger.info("Mail skickad till support {}'", recipient)
+        Transport.send(msg);
 
+        logger.info("Mail skickad till support {}'", recipient)
+    } catch (Exception ex) {
+        logger.error(ExceptionUtils.getStackTrace(ex))
+    }
 }
 
 
