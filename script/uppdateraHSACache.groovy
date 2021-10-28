@@ -70,7 +70,7 @@ try {
     validateHSAFileAndChangeSymlink(hsaFile)
     resetHSACache()
 } catch (Exception e) {
-    logger.error("", e)
+    logger.error(ExceptionUtils.getMessage(e), e)
     sendProblemMail(e)
 }
 
