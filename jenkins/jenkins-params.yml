@@ -1,5 +1,7 @@
 sonar-projectkey: 'ntjp-hsa-cache'                                        # The project key for the project.
 archive-artifacts: '**/target/*.jar,**/target/*.zip'                      # The artifacts to archive.
+sonar-java-binaries: 'target/classes/**/*'                                # What binaries to scan.
+sonar-jacoco-reports: './target/site/jacoco.xml'                          # Where the jacoco coverage report is stored.
 maven-docker-args: '-e GRAILS_MAVEN_LOCAL=${WORKSPACE}/?/.m2/repository/' # Extra maven docker image arguments.
 maven-docker-image: 'maven:3.8.1-jdk-8'                                   # The Maven Docker image to use.
 jdk-path: 'Java_8_221'                                                    # JDK path.
