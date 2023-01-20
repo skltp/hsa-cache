@@ -14,6 +14,8 @@
         <!-- Turn off strict checking of javadoc tags for Java 8 -->
         <additionalparam>-Xdoclint:none</additionalparam>
         <doclint>none</doclint>
+        <jacoco.plugin.version>0.8.5</jacoco.plugin.version>
+		<surefire.plugin.version>2.22.2</surefire.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -144,6 +146,36 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+			<id>test-coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.plugin.version}</version>
+						<executions>
+							<execution>
+								<id>default-prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>default-report</id>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
     </profiles>
 
 
