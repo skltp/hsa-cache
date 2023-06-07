@@ -215,8 +215,8 @@ private static List<String> getVPServerUrls() {
         V1PodList list = api.listNamespacedPod(podNamespace, null, false, null, null, labelSelector, null, null, null, 10, false);
 
         list.getItems().each { item ->
-            logger.debug("Name: %s IP: %s Phase: %s", item.getMetadata().getName(), item.getStatus().getPodIP(), item.getStatus().getPhase())
-            if (item.getStatus().getPhase() == "Running") {
+            logger.debug("Name: {} IP: {} Phase: {}", item.getMetadata().getName(), item.getStatus().getPodIP(), item.getStatus().getPhase())
+            if (item.getStatus().getPhase().equals("Running")) {
                 urls.add(String.format("http://%s:24000/resethsacache", item.getStatus().getPodIP()))
             }
         }
