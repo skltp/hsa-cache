@@ -207,15 +207,17 @@ private static List<String> getVPServerUrls() {
         ApiClient client = Config.defaultClient();
         CoreV1Api api = new CoreV1Api(client);
 
-        String podNamespace = "ntjp-dev"
-        String labelSelector = "app=vp"
+        String podNamespace = System.getenv("HSA_RESET_POD_NAMESPACE")
+        String labelSelector = System.getenv("HSA_RESET_LABEL_SELECTOR")
+        String urlFormat = System.getenv("HSA_RESET_URL_FORMAT")
+        int timeout = Integer.parseInt(System.getenv("HSA_RESET_TIMEOUT") ?: "10")
 
-        V1PodList list = api.listNamespacedPod(podNamespace, null, false, null, null, labelSelector, null, null, null, 10, false);
+        V1PodList list = api.listNamespacedPod(podNamespace, null, false, null, null, labelSelector, null, null, null, timeout, false);
 
         list.getItems().each { item ->
             logger.debug("Name: {} IP: {} Phase: {}", item.getMetadata().getName(), item.getStatus().getPodIP(), item.getStatus().getPhase())
             if (item.getStatus().getPhase().equals("Running")) {
-                urls.add(String.format("http://%s:24000/resethsacache", item.getStatus().getPodIP()))
+                urls.add(String.format(urlFormat, item.getStatus().getPodIP()))
             }
         }
 
