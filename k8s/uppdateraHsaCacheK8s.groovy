@@ -246,15 +246,9 @@ private static void resetHSACache() {
 }
 
 private static Properties downloadProperties() {
-    String propertiesFileName = System.getenv("ALERT_MAIL_SMTP_PROPERTIES_FILE")
-    File propertiesFile = new File(propertiesFileName)
-    logger.debug("Load properties from file " + propertiesFile.absolutePath)
-
+    String propertiesString = System.getenv("SMTP_PROPERTIES")
     Properties properties = new Properties()
-
-    propertiesFile.withInputStream {
-        properties.load(it)
-    }
+    properties.load(new StringReader(propertiesString))
 
     properties
 }
