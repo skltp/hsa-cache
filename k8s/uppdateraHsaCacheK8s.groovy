@@ -210,7 +210,7 @@ private static List<String> getVPServerUrls() {
         String podNamespace = System.getenv("HSA_RESET_POD_NAMESPACE")
         String labelSelector = System.getenv("HSA_RESET_LABEL_SELECTOR")
         String urlFormat = System.getenv("HSA_RESET_URL_FORMAT")
-        int timeout = Integer.parseInt(System.getenv("HSA_RESET_TIMEOUT") ?: "10")
+        int timeout = Integer.parseInt(System.getenv("HSA_RESET_LOOKUP_TIMEOUT") ?: "10")
 
         V1PodList list = api.listNamespacedPod(podNamespace, null, false, null, null, labelSelector, null, null, null, timeout, false);
 
