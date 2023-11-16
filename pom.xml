@@ -4,7 +4,7 @@
 
     <groupId>se.skltp.hsa-cache</groupId>
     <artifactId>hsa-cache</artifactId>
-    <version>1.1.0-RC3-SNAPSHOT</version>
+    <version>1.1.0-RC3</version>
 
     <properties>
         <commons-lang.version>2.6</commons-lang.version>
@@ -24,7 +24,7 @@
         <url>http://github.com/skltp/hsa-cache</url>
         <connection>scm:git:https://github.com/skltp/hsa-cache.git</connection>
         <developerConnection>scm:git:https://github.com/skltp/hsa-cache.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.1.0-RC3</tag>
     </scm>
 
     <distributionManagement>
