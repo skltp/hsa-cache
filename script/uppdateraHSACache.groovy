@@ -18,6 +18,7 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import javax.net.ssl.*
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.security.KeyStore
 import java.text.SimpleDateFormat
 import java.util.zip.ZipFile
@@ -27,7 +28,8 @@ import java.util.zip.ZipFile
         @Grab(group = 'com.sun.mail', module = 'javax.mail', version = '1.6.1'),
         @Grab(group = 'commons-beanutils', module = 'commons-beanutils', version = '1.9.3'),
         @Grab(group = 'ch.qos.logback', module = 'logback-classic', version = '1.2.3'),
-        @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.0.0'),
+        @Grab(group = 'net.logstash.logback', module = 'logstash-logback-encoder', version='6.4'),
+        @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.0.1'),
         @GrabConfig(systemClassLoader = true)
 ])
 
@@ -68,13 +70,12 @@ try {
     validateHSAFileAndChangeSymlink(hsaFile)
     resetHSACache()
 } catch (Exception e) {
-    logger.error("", e)
+    logger.error(ExceptionUtils.getMessage(e), e)
     sendProblemMail(e)
 }
 
 
 private static void changeSymlinksToHSAFiles(File hsaFile) {
-    logger.info("Nuvarande hsa link är " + getCurrentHSAFile())
     def symlink = appProperties.getProperty("hsa.symlink.file")
     def symlinkFile = new File(symlink)
 
@@ -122,13 +123,13 @@ private static File createUniqueHsaFile(String fileName, String destDir) {
     return addIndexIfFileExist(fileNameWithDate, destDir)
 }
 
-private static String addCurrentDateToFileName(String fileName){
+private static String addCurrentDateToFileName(String fileName) {
     int dotIndex = fileName.lastIndexOf(".")
     String date = new SimpleDateFormat("_yyyyMMdd").format(new Date())
     return fileName.substring(0, dotIndex) + date + fileName.substring(dotIndex, fileName.size())
 }
 
-private static File addIndexIfFileExist(String fileName, String destDir){
+private static File addIndexIfFileExist(String fileName, String destDir) {
     int dotIndex = fileName.lastIndexOf(".")
     def currentFile = new File(destDir, fileName)
     int i = 0
@@ -145,19 +146,28 @@ private static validateHSAFileAndChangeSymlink(File hsaFile) {
 
     verifier.validateFileAgainstXSD()
 
-    int diff = verifier.hsaCacheDiff(getCurrentHSAFile())
+    try {
+        validateAgainstCurrentHSAFile(verifier)
+    } catch (NoSuchFileException e) {
+        logger.info("Det finns ingen nuvarande hsa fil.")
+    }
+
+    String date = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(verifier.getCreationDate())
+    logger.info("HSA filen {} är skapad  {}", hsaFile.name, date)
+
+    changeSymlinksToHSAFiles(hsaFile)
+}
+
+private static void validateAgainstCurrentHSAFile(HsaFileVerifierImpl verifier) {
+    String currentHsaFile = getCurrentHSAFile()
+    logger.info("Nuvarande hsa link är " + currentHsaFile)
+    int diff = verifier.hsaCacheDiff(currentHsaFile)
     logger.info("Det är {} skillnader mellan gammal och ny hsa fil.", diff)
 
     int allowableDiff = Integer.parseInt(appProperties.getProperty("allowable.diff.hsa.file"))
     if (diff > allowableDiff) {
         throw new HSAException("Fel under validering. Antalet skillnader mellan ny och gammal hsa fil är " + diff + ". Max antal tillåtna är " + allowableDiff)
     }
-
-    String date = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(verifier.getCreationDate())
-    logger.info("HSA filen {} är skapad  {}", hsaFile.name ,date)
-
-
-    changeSymlinksToHSAFiles(hsaFile)
 }
 
 private static Properties downloadProperties() {
@@ -231,9 +241,9 @@ private static void downloadHSAFilesFromServer() {
     keyManagers[0] = x509KeyManager
 
 
-    SSLContext sslContext = SSLContext.getInstance("TLS")
+    SSLContext sslContext = SSLContext.getInstance("TLSv1.2")
     sslContext.init(keyManagers, trustManagers, null)
-    String[] supportedProtocols = ["TLSv1"].toArray()
+    String[] supportedProtocols = ["TLSv1.2"].toArray()
     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, supportedProtocols, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier())
     CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build()
 
@@ -255,50 +265,48 @@ private static void downloadHSAFilesFromServer() {
 }
 
 private static void sendProblemMail(Exception e) {
-    Session session = Session.getDefaultInstance(appProperties)
-    MimeMessage msg = new MimeMessage(session)
-    def text = appProperties.getProperty("alert.mail.text")
-    msg.setText(String.format(text, ExceptionUtils.getStackTrace(e)));
+    if (!Boolean.parseBoolean(appProperties.getProperty("send.mail"))) {
+        logger.info("Mailalert om problem med hsa uppdatering är avstängd!")
+        return
+    }
 
-    sendMail(msg)
+    try {
+        Session session = Session.getInstance(appProperties)
 
+        MimeMessage msg = new MimeMessage(session)
+
+        def text = appProperties.getProperty("alert.mail.text")
+        msg.setText(String.format(text, ExceptionUtils.getStackTrace(e)));
+
+        def subject = appProperties.getProperty("alert.mail.subject")
+        msg.setSubject(subject)
+
+        def login = appProperties.getProperty("mail.smtp.login")
+        msg.setFrom(new InternetAddress(login))
+
+        def recipient = appProperties.getProperty("to.mail")
+        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient))
+
+        Transport.send(msg);
+
+        logger.info("Mail skickad till support {}'", recipient)
+    } catch (Exception ex) {
+        logger.error(ExceptionUtils.getStackTrace(ex))
+    }
 }
 
-private static void sendMail(MimeMessage msg) {
-    if (!Boolean.parseBoolean(appProperties.getProperty("send.mail"))) return
-
-    def host = appProperties.getProperty("mail.smtp.host")
-    def port = Integer.parseInt(appProperties.getProperty("mail.smtp.port"))
-    def login = appProperties.getProperty("mail.smtp.login")
-    def password = appProperties.getProperty("mail.smtp.password")
-    def recipient = appProperties.getProperty("to.mail")
-    def subject = appProperties.getProperty("alert.mail.subject")
-
-    msg.setSubject(subject)
-    msg.setFrom(new InternetAddress(login))
-    msg.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient))
-
-    Session session = Session.getDefaultInstance(appProperties)
-    Transport transport = session.getTransport("smtps")
-    transport.connect(host, port, login, password)
-    transport.sendMessage(msg, msg.getAllRecipients())
-    transport.close()
-
-    logger.info("Mail skickad till support {}'", recipient)
-
-}
 
 private static List<String> getVPServerUrls() {
     List<String> urls = new ArrayList<>();
     String url = appProperties.getProperty("reset.HSA.cache.url")
-    if(url != null && !url.isEmpty()){
+    if (url != null && !url.isEmpty()) {
         urls.add(url);
     }
 
-    int index=1;
-    while(true){
-        url = appProperties.getProperty("reset.HSA.cache.url."+index);
-        if(url != null && !url.isEmpty()){
+    int index = 1;
+    while (true) {
+        url = appProperties.getProperty("reset.HSA.cache.url." + index);
+        if (url != null && !url.isEmpty()) {
             urls.add(url);
         } else {
             break;
@@ -311,13 +319,13 @@ private static List<String> getVPServerUrls() {
 
 private static void resetHSACache() {
     List<String> urls = getVPServerUrls();
-    if(urls.isEmpty()){
+    if (urls.isEmpty()) {
         throw new HSAException("No VP servers to reset configured");
     }
 
-    for(url in urls) {
+    for (url in urls) {
         def result = new URL(url).text
-        logger.info("Reset on '"+ url + "' returns:\n" + result)
+        logger.info("Reset on '" + url + "' returns:\n" + result)
 
         if (!result.contains("Successfully reset HSA cache")) {
             throw new HSAException(result)

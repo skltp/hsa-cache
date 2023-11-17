@@ -23,6 +23,7 @@ package se.skl.tp.hsa.cache;
 import java.util.Date;
 import java.util.List;
 
+
 public interface HsaCache {
 	
 	/**
@@ -66,9 +67,8 @@ public interface HsaCache {
 	 * @param hsaId the HSA-ID
 	 * @return parent HSA-ID
 	 * 
-	 * @throws HsaCacheInitializationException if the cache has not been initialized
 	 */
-	String getParent(String hsaId) throws HsaCacheInitializationException;
+	String getParent(String hsaId);
 	
 	/**
 	 * Get the children HSA-ID for a specific HSA-ID

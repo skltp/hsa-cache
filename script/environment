@@ -1,5 +1,5 @@
 export LANG=sv_SE.utf8
 export LC_ALL=sv_SE.utf8
 
-JAVA_HOME=/local/java/1.7.0
+JAVA_HOME=/local/java/1.8.0
 export JAVA_HOME
