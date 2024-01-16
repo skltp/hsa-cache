@@ -3,6 +3,7 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import se.skl.tp.hsa.cache.HsaFileVerifierImpl
+import java.nio.file.Paths
 
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
@@ -41,6 +42,7 @@ try {
     File hsaFile = unzipFilesToDir()[0]
     validateHSAFileAndChangeSymlink(hsaFile)
     resetHSACache()
+    deleteOldHsaFiles(hsaFile)
 } catch (Exception e) {
     logger.error(ExceptionUtils.getMessage(e), e)
     sendProblemMail(e)
@@ -243,6 +245,20 @@ private static void resetHSACache() {
 
         if (!result.contains("Successfully reset HSA cache")) {
             throw new HSAException(result)
+        }
+    }
+}
+
+private static void deleteOldHsaFiles(File hsaFileToKeep) {
+    logger.info("Tar bort gammla hsa-filer")
+    def hsaFilesDirName = System.getenv("HSA_FILES_DIR")
+    def dir = new File(hsaFilesDirName)
+
+    dir.eachFile { file ->
+        if (!file.equals(hsaFileToKeep) && !file.isDirectory() &&
+                !Files.isSymbolicLink(Paths.get(file.absolutePath))) {
+            file.delete()
+            logger.info("Tar bort file " + Paths.get(file.absolutePath))
         }
     }
 }
