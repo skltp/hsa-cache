@@ -43,6 +43,7 @@ try {
     validateHSAFileAndChangeSymlink(hsaFile)
     resetHSACache()
     deleteOldHsaFiles(hsaFile)
+    logger.info("Hsa cache är uppdaterad.")
 } catch (Exception e) {
     logger.error(ExceptionUtils.getMessage(e), e)
     sendProblemMail(e)
