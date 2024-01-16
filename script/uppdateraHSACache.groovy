@@ -19,6 +19,7 @@ import javax.mail.internet.MimeMessage
 import javax.net.ssl.*
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
+import java.nio.file.Paths
 import java.security.KeyStore
 import java.text.SimpleDateFormat
 import java.util.zip.ZipFile
@@ -69,6 +70,8 @@ try {
     File hsaFile = unzipFilesToDir()[0]
     validateHSAFileAndChangeSymlink(hsaFile)
     resetHSACache()
+    deleteOldHsaFiles(hsaFile)
+    logger.info("Hsa cache är uppdaterad.")
 } catch (Exception e) {
     logger.error(ExceptionUtils.getMessage(e), e)
     sendProblemMail(e)
@@ -333,6 +336,19 @@ private static void resetHSACache() {
     }
 }
 
+private static void deleteOldHsaFiles(File hsaFileToKeep) {
+    logger.info("Tar bort gammla hsa-filer")
+    String hsaFilesDirName = appProperties.getProperty("hsa.files.dir")
+    def dir = new File(hsaFilesDirName)
+
+    dir.eachFile { file ->
+        if (!file.equals(hsaFileToKeep) && !file.isDirectory() &&
+                !Files.isSymbolicLink(Paths.get(file.absolutePath))) {
+            file.delete()
+            logger.info("Tar bort file " + Paths.get(file.absolutePath))
+        }
+    }
+}
 
 class HSAException extends Exception {
     HSAException(String msg) {
