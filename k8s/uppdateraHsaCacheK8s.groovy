@@ -159,7 +159,6 @@ private static void downloadHSAFilesFromServer() {
     def b = new StringBuffer()
     proc.consumeProcessErrorStream(b)
     proc.waitFor(30, TimeUnit.SECONDS)
-    logger.debug(proc.text)
 
     if (proc.exitValue() != 0) {
         throw new HSAException("Failed to get HSA file: " + b.toString())
