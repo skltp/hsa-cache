@@ -25,12 +25,14 @@ import java.text.SimpleDateFormat
 import java.util.zip.ZipFile
 
 @Grapes([
+        @GrabResolver(name='ntjp-repo', root='https://repo.ntjp.se/repository/SKLTP-Releases/'),
         @Grab(group = 'org.apache.httpcomponents', module = 'httpclient', version = '4.5.5'),
         @Grab(group = 'com.sun.mail', module = 'javax.mail', version = '1.6.1'),
         @Grab(group = 'commons-beanutils', module = 'commons-beanutils', version = '1.9.3'),
-        @Grab(group = 'ch.qos.logback', module = 'logback-classic', version = '1.2.3'),
+        @Grab(group = 'ch.qos.logback', module = 'logback-classic', version = '1.5.6'),
+        @Grab(group = 'org.slf4j', module = 'slf4j-api', version = '2.0.13'),
         @Grab(group = 'net.logstash.logback', module = 'logstash-logback-encoder', version='6.4'),
-        @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.0.1'),
+        @Grab(group = 'se.skltp.hsa-cache', module = 'hsa-cache', version = '1.1.1'),
         @GrabConfig(systemClassLoader = true)
 ])
 
