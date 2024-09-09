@@ -20,11 +20,6 @@
  */
 package se.skl.tp.hsa.cache;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Represents information regarding a Hsa Node in the Tree.
  * 

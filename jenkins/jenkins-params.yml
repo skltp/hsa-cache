@@ -2,3 +2,5 @@ sonar-projectkey: 'ntjp-hsa-cache'                                        # The 
 archive-artifacts: '**/target/*.jar,**/target/*.zip'                      # The artifacts to archive.
 sonar-java-binaries: 'target/classes/**/*'                                # What binaries to scan.
 sonar-jacoco-reports: './target/site/jacoco.xml'                          # Where the jacoco coverage report is stored.
+maven-docker-image: 'maven:3.9-eclipse-temurin-17'
+jdk-path: openjdk-17
