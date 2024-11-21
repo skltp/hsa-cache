@@ -9,7 +9,7 @@
     <properties>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-cli.version>1.9.0</commons-cli.version>
-        <spring-context.version>5.3.39</spring-context.version>
+        <spring-context.version>6.1.14</spring-context.version>
 		<slf4j.version>2.0.16</slf4j.version>
         <!-- Turn off strict checking of javadoc tags for Java 8 -->
         <additionalparam>-Xdoclint:none</additionalparam>
