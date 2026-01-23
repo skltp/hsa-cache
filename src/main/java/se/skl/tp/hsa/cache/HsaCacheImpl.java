@@ -28,7 +28,8 @@ import java.util.*;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ public class HsaCacheImpl implements HsaCache {
 	/**
 	 * Logger
 	 */
-	private Logger log = LoggerFactory.getLogger(HsaCacheImpl.class);
+	private final Logger log = LoggerFactory.getLogger(HsaCacheImpl.class);
 
 	/**
 	 * Map holding the cache
@@ -72,13 +73,11 @@ public class HsaCacheImpl implements HsaCache {
 	 * Default constructor initializes the cache in empty state
 	 */
 	public HsaCacheImpl() {
-		cache = new HashMap<String, HsaNode>();
+		cache = new HashMap<>();
 	}
 
 	/**
 	 * Constructor that initializes the cache from a file.
-	 *
-	 * @param filenames
 	 */
 	public HsaCacheImpl(String ... filenames) {
 		this.init(filenames);
@@ -98,10 +97,10 @@ public class HsaCacheImpl implements HsaCache {
 		return this;
 	}
 
-	public HsaCache init(String filename, HsaRelationBuilder relationBuilder, HsaFileParser parser) {
+	public void init(String filename, HsaRelationBuilder relationBuilder, HsaFileParser parser) {
 		this.builder = relationBuilder;
 		this.parser = parser;
-		return init(filename);
+		init(filename);
 	}
 	/**
 	 * Uses {@link HsaFileParser} and {@link HsaRelationBuilder} to populate cache.
@@ -114,7 +113,7 @@ public class HsaCacheImpl implements HsaCache {
 	private Map<String,HsaNode> doInitialize(String ... filenames) throws XMLStreamException, IOException {
 		DateFormat df = new SimpleDateFormat(DATE_FORMAT);
 		Date latestCreationDate = null;
-		Map<Dn, HsaNode> hsaObjects = new HashMap<Dn,HsaNode>();
+		Map<Dn, HsaNode> hsaObjects = new HashMap<>();
 		for(String filename: filenames){
 			HSAData data = parser.parse(filename);
 			hsaObjects.putAll(data.getCache());
@@ -125,8 +124,7 @@ public class HsaCacheImpl implements HsaCache {
 				}
 
 			} catch (ParseException e) {
-				e.printStackTrace();
-				log.error("Can't parse date {} in file {}", data.getHsaFileCreationDate(), filename);
+				log.error("Can't parse date {} in file {}", data.getHsaFileCreationDate(), filename, e);
 			}
 
 		}
@@ -134,7 +132,6 @@ public class HsaCacheImpl implements HsaCache {
 		return builder.setRelations(hsaObjects);
 	}
 
-    // public List<HsaNodeInfo> freeTextSearch(String searchText, int maxNoOFCharsNotMatching) {
     public List<HsaNodeInfo> freeTextSearch(String searchText, int maxNoOfHits) {
 
         // For future enhanced "close matching" search logic:
@@ -142,8 +139,8 @@ public class HsaCacheImpl implements HsaCache {
 
         log.debug("Looking for {} in the hsa-tree", searchText);
 
-        List<HsaNodeInfo> list = new ArrayList<HsaNodeInfo>();
-        String[] searchTexts = StringUtils.split((searchText == null) ? searchText : searchText.toUpperCase()); // Convert toUpper for performance reasons since StringUtil.containsIgnoreCase() perform an toUpper()
+        List<HsaNodeInfo> list = new ArrayList<>();
+        String[] searchTexts = StringUtils.split((searchText == null) ? null : searchText.toUpperCase()); // Convert toUpper for performance reasons since StringUtil.containsIgnoreCase() perform an toUpper()
 
         // If the search text only contains whitespace or is null then return an empty list
         if (searchTexts == null || searchTexts.length == 0) return list;
@@ -168,15 +165,15 @@ public class HsaCacheImpl implements HsaCache {
         for (String searchFragment: searchTexts) {
 
             // Fail if this searchFragment can't be found in neither the HSA-id nor in the DN-string
-            if ((StringUtils.containsIgnoreCase(node.getHsaId(), searchFragment)) ||
-                (StringUtils.containsIgnoreCase(node.getDn().toString(), searchFragment)) ||
-                (StringUtils.containsIgnoreCase(node.getName(), searchFragment))) {
+            if ((Strings.CI.contains(node.getHsaId(), searchFragment)) ||
+                (Strings.CI.contains(node.getDn().toString(), searchFragment)) ||
+                (Strings.CI.contains(node.getName(), searchFragment))) {
 
-                log.debug("Found {} in {}", searchFragment, node.toString());
+                log.debug("Found {} in {}", searchFragment, node);
 
             } else {
 
-                log.debug("Failed to find {} in {}, try next HSA-node", searchFragment, node.toString());
+                log.debug("Failed to find {} in {}, try next HSA-node", searchFragment, node);
                 match = false;
                 break;
             }
@@ -192,9 +189,9 @@ public class HsaCacheImpl implements HsaCache {
 	public String getParent(String hsaId) {
 		try {
 			HsaNode entry = getHsaNodeFromCache(hsaId);
-			return (entry.getParent() != null) ? entry.getParent().getHsaId() : DEFAUL_ROOTNODE;
+			return (entry.getParent() != null) ? entry.getParent().getHsaId() : DEFAULT_ROOTNODE;
 		} catch (HsaCacheNodeNotFoundException e) {
-			return DEFAUL_ROOTNODE;
+			return DEFAULT_ROOTNODE;
 		}
 	}
 
@@ -206,7 +203,7 @@ public class HsaCacheImpl implements HsaCache {
 	public List<String> getChildren(String hsaId) throws HsaCacheNodeNotFoundException {
 		HsaNode entry = getHsaNodeFromCache(hsaId);
 		
-		List<String> childHsaIds = new ArrayList<String>();
+		List<String> childHsaIds = new ArrayList<>();
 		for(HsaNode child : entry.getChildren()){
 			childHsaIds.add(child.getHsaId());
 		}
@@ -265,34 +262,32 @@ public class HsaCacheImpl implements HsaCache {
     /**
      * Returns number of unique elements in HSA caches (cache difference)
      * @param cacheB - cache for compare
-     * @return
      */
     @Override
 	public int calculateHSACacheDiff(HsaCache cacheB) {
-        int cardinalityA_only = 0;
-        int cardinalityB_only = 0;
-        int cardinalityAB_intersection = 0;
+        int cardinalityAOnly = 0;
+        int cardinalityBOnly;
+        int cardinalityABIntersection = 0;
 
 		for(Map.Entry<String, HsaNode> element : cache.entrySet()){
 			String name = element.getKey();
-            HsaNode node_A = getNode(name);
-	        HsaNode node_B = cacheB.getNode(name);
+            HsaNode nodeA = getNode(name);
+	        HsaNode nodeB = cacheB.getNode(name);
 
-	        if(node_B == null){
-	            cardinalityA_only++;
+	        if(nodeB == null){
+	            cardinalityAOnly++;
 	            continue;
             }
 
-	        if(node_A.equals(node_B)){
-	             cardinalityAB_intersection ++;
+	        if(nodeA.equals(nodeB)){
+	             cardinalityABIntersection ++;
             } else {
-                cardinalityA_only++;
-                //todo log
+                cardinalityAOnly++;
             }
 
 		}
 
-	    cardinalityB_only = cacheB.getHSACacheSize() - cardinalityAB_intersection;
-		return cardinalityA_only + cardinalityB_only;
+	    cardinalityBOnly = cacheB.getHSACacheSize() - cardinalityABIntersection;
+		return cardinalityAOnly + cardinalityBOnly;
 	}
 }

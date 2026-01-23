@@ -20,80 +20,80 @@
  */
  package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.*;
-
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 import org.xml.sax.SAXException;
 
-import javax.xml.stream.XMLStreamException;
+import static org.junit.jupiter.api.Assertions.*;
 
-
-public class HsaFileVerifierImplTest {
+class HsaFileVerifierImplTest {
 
 
     @Test
-    public void testOkValidationAgainstSchema() throws Exception {
-        URL url = getClass().getClassLoader().getResource("simpleTestPart1.xml");
+    void testOkValidationAgainstSchema() throws Exception {
+        URL url = getUrl("simpleTestPart1.xml");
         HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
         hsaFileVerifier.validateFileAgainstXSD();
 
-        url = getClass().getClassLoader().getResource("simpleTestPart1.xml");
-        hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
-        hsaFileVerifier.validateFileAgainstXSD();
-
-        url = getClass().getClassLoader().getResource("simpleTestPart2.xml");
+        url = getUrl("simpleTestPart2.xml");
         hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
         hsaFileVerifier.validateFileAgainstXSD();
 
     }
 
-    @Test(expected = HsaCacheInitializationException.class)
-    public void testValidationOfMalformedFile() throws Exception {
-        URL url = getClass().getClassLoader().getResource("hsaCacheMalformed.xml");
-        HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
-        hsaFileVerifier.validateFileAgainstXSD();
-    }
-
-    @Test(expected = SAXException.class)
-    public void testValidationOfEmptyFile() throws Exception {
-        URL url = getClass().getClassLoader().getResource("hsaCacheNoUnits.xml");
-        HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
-        hsaFileVerifier.validateFileAgainstXSD();
-    }
-
-    @Test(expected = SAXException.class)
-    public void testValidationOfFileWithMissingDN() throws Exception {
-        URL url = getClass().getClassLoader().getResource("hsaCacheMissingDN.xml");
-        HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
-        hsaFileVerifier.validateFileAgainstXSD();
+    @Test
+    void testValidationOfMalformedFile() {
+        URL url = getUrl("hsaCacheMalformed.xml");
+        String filename = url.getFile();
+        assertThrows(HsaCacheInitializationException.class, () -> new HsaFileVerifierImpl(filename));
     }
 
     @Test
-    public void testHsaCacheDiffZeroDiffs() throws Exception {
-        URL url = getClass().getClassLoader().getResource("simpleTest.xml");
+    void testValidationOfEmptyFile() {
+        URL url = getUrl("hsaCacheNoUnits.xml");
+        HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
+        assertThrows(SAXException.class, hsaFileVerifier::validateFileAgainstXSD);
+    }
+
+    @Test
+    void testValidationOfFileWithMissingDN() {
+        URL url = getUrl("hsaCacheMissingDN.xml");
+        HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
+        assertThrows(SAXException.class, hsaFileVerifier::validateFileAgainstXSD);
+    }
+
+    @Test
+    void testHsaCacheDiffZeroDiffs() {
+        URL url = getUrl("simpleTest.xml");
         HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
         int diffSize = hsaFileVerifier.hsaCacheDiff(url.getFile());
-        assertEquals("Should not be a diff",0, diffSize);
+        assertEquals(0, diffSize);
     }
 
     @Test
-    public void testHsaCacheDiff3Diffs() throws Exception {
-        URL url = getClass().getClassLoader().getResource("simpleTest.xml");
+    void testHsaCacheDiff3Diffs() {
+        URL url = getUrl("simpleTest.xml");
         HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
-        URL url2 = getClass().getClassLoader().getResource("simpleTestPart2.xml");
+        URL url2 = getUrl("simpleTestPart2.xml");
         int diffSize = hsaFileVerifier.hsaCacheDiff(url2.getFile());
         assertEquals(3, diffSize);
     }
 
     @Test
-    public void testHsaCacheDiff5Diffs() throws Exception {
-        URL url = getClass().getClassLoader().getResource("simpleTestPart1.xml");
+    void testHsaCacheDiff5Diffs() {
+        URL url = getUrl("simpleTestPart1.xml");
         HsaFileVerifier hsaFileVerifier = new HsaFileVerifierImpl(url.getFile());
-        URL url2 = getClass().getClassLoader().getResource("simpleTestPart2.xml");
+        URL url2 = getUrl("simpleTestPart2.xml");
         int diffSize = hsaFileVerifier.hsaCacheDiff(url2.getFile());
         assertEquals(5, diffSize);
     }
 
+    @NonNull
+    private URL getUrl(String name) {
+        URL url = getClass().getClassLoader().getResource(name);
+        assertNotNull(url);
+        return url;
+    }
 }

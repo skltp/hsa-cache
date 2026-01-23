@@ -27,7 +27,7 @@ package se.skl.tp.hsa.cache;
  *
  */
 public interface HsaNodeInfo {
-    public String getHsaId();
-    public String getDn();
-    public String getName();
+    String getHsaId();
+    String getDn();
+    String getName();
 }

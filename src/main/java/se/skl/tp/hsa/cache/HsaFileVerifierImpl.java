@@ -35,8 +35,8 @@ import java.util.Date;
 
 public class HsaFileVerifierImpl implements HsaFileVerifier {
     private static final String HSA_CACHE_XSD = "HsaCache.xsd";
-    private String file;
-    private HsaCache newCache;
+    private final String file;
+    private final HsaCache newCache;
 
     public HsaFileVerifierImpl(String newHSACacheFile) {
         file = newHSACacheFile;
@@ -57,8 +57,12 @@ public class HsaFileVerifierImpl implements HsaFileVerifier {
     @Override
     public void validateFileAgainstXSD() throws IOException, SAXException {
         Source xmlFile = new StreamSource(new File(file));
-        SchemaFactory schemaFactory = SchemaFactory
-                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+        // Secure against XXE attacks
+        schemaFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 
         Schema schema = schemaFactory.newSchema(getSchema());
         Validator validator = schema.newValidator();

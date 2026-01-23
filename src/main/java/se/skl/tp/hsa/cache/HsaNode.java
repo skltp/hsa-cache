@@ -23,7 +23,7 @@ package se.skl.tp.hsa.cache;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents a Hsa Node in the Tree. Has one parent and children.
@@ -41,7 +41,7 @@ public class HsaNode {
 	/**
 	 * Line in XML file that this node was read from (for debug)
 	 */
-	private long lineNo;
+	private final long lineNo;
 	
 	/**
 	 * HSA-ID of this node
@@ -62,7 +62,7 @@ public class HsaNode {
 	/**
 	 * Children of this node
 	 */
-	private List<HsaNode> children = new ArrayList<HsaNode>();
+	private final List<HsaNode> children = new ArrayList<>();
 	
 	/**
 	 * Creates a new node
@@ -110,7 +110,7 @@ public class HsaNode {
 	}
 	
 	public List<HsaNode> getChildren() {
-		return new ArrayList<HsaNode>(children);
+		return new ArrayList<>(children);
 	}
 		
 	@Override
@@ -145,8 +145,6 @@ public class HsaNode {
 			return false;
 		if(!hsaId.equals(other.getHsaId()))
 			return false;
-		if(!name.equals(other.getName()))
-			return false;
-		return true;
-	}
+        return name.equals(other.getName());
+    }
 }

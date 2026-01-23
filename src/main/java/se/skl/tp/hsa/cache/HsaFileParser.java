@@ -22,8 +22,6 @@ package se.skl.tp.hsa.cache;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -50,7 +48,7 @@ public class HsaFileParser {
 	private static final String ELEMENT_NAME_HSA_OBJECT = "hsaUnit";
 	private static final String ELEMENT_NAME_CREATION_DATE = "endDate";
 
-	private static Logger log = LoggerFactory.getLogger(HsaFileParser.class);
+	private static final Logger log = LoggerFactory.getLogger(HsaFileParser.class);
 	
 	/**
 	 * Parses XML file
@@ -79,7 +77,7 @@ public class HsaFileParser {
 	public HSAData parse(InputStream is) throws XMLStreamException, IOException {
 		return doParseFile(new BufferedInputStream(is));
 	}
-	
+
 	/**
 	 * Does the parsing
 	 * 
@@ -93,72 +91,26 @@ public class HsaFileParser {
 	protected HSAData doParseFile(InputStream in) throws XMLStreamException, IOException {
 		HSAData hsaDataFromFile = new HSAData();
 
-//		Map<Dn, HsaNode> cache = new HashMap<Dn, HsaNode>();
-
 		try {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			// Prevent XXE attacks
+			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+
 			XMLEventReader eventReader = inputFactory.createXMLEventReader(in, StandardCharsets.UTF_8.toString());
 	
-			HsaNode entry = null;
-			long startRow = 0;
-			
+			State state = new State();
+
 			while (eventReader.hasNext()) {
 				XMLEvent event = eventReader.nextEvent();
 
-				if(event.isStartElement()) {
-					StartElement startElement = event.asStartElement();
-					String tagName =  startElement.getName().getLocalPart();
-
-					// When we hit a <endDate> tag
-					if (ELEMENT_NAME_CREATION_DATE.equals(tagName) && hsaDataFromFile.getHsaFileCreationDate() == null) {
-						hsaDataFromFile.setHsaFileCreationDate(getCharactersToEndTag(eventReader, ELEMENT_NAME_CREATION_DATE ));
-						continue;
-					}
-
-					// When we hit a <hsaUnit> tag
-					if (ELEMENT_NAME_HSA_OBJECT.equals(tagName)) {
-						startRow = startElement.getLocation().getLineNumber();
-						entry = new HsaNode(startRow);
-						continue;
-					}
-
-					// When we hit a <DN> tag
-					if (ELEMENT_NAME_DN.equals(tagName)) {
-						entry.setDn(getCharactersToEndTag(eventReader, ELEMENT_NAME_DN ));
-						continue;
-					}
-
-					// When we hit a <hsaIdentity> tag
-					if (ELEMENT_NAME_HSA_IDENTITY.equals(tagName)) {
-						entry.setHsaId(getCharactersToEndTag(eventReader, ELEMENT_NAME_HSA_IDENTITY));
-						continue;
-					}
-
-					// When we hit a <name> tag
-					if (ELEMENT_NAME_NAME.equals(tagName)) {
-						entry.setName(getCharactersToEndTag(eventReader, ELEMENT_NAME_NAME));
-						continue;
-					}
-
+				boolean tagFound = false;
+				if (event.isStartElement()) {
+					tagFound = processStartElement(event, hsaDataFromFile, eventReader, state);
 				}
-				// When we hit a </hsaUnit> tag
-				if(event.isEndElement()) {
-					EndElement endElement = event.asEndElement();
-					if (ELEMENT_NAME_HSA_OBJECT.equals(endElement.getName().getLocalPart())) {
-						if(entry.isValid()) {
-							HsaNode previous = hsaDataFromFile.getCache().put(entry.getDn(), entry);
-							if(previous != null) {
-								throw new IllegalStateException("HsaObject entry invalid @ LineNo:" + startRow + ", Duplicate with: " + previous.toString());
-							}
-						} else {
-							logError("HsaObject entry invalid @ LineNo:" + startRow + ", entry: " + entry);
-						}
-						continue;
-					}				
+				if (!tagFound && event.isEndElement()) {
+					processEndElement(event, state, hsaDataFromFile);
 				}
-				
-
-
 			}
 		} finally {
 			if(in != null) {
@@ -166,6 +118,55 @@ public class HsaFileParser {
 			}
 		}
 		return hsaDataFromFile;
+	}
+
+	private boolean processStartElement(XMLEvent event, HSAData hsaDataFromFile, XMLEventReader eventReader, State state) throws XMLStreamException {
+		StartElement startElement = event.asStartElement();
+		String tagName = startElement.getName().getLocalPart();
+
+		// When we hit a <endDate> tag
+		if (ELEMENT_NAME_CREATION_DATE.equals(tagName) && hsaDataFromFile.getHsaFileCreationDate() == null) {
+			hsaDataFromFile.setHsaFileCreationDate(getCharactersToEndTag(eventReader, ELEMENT_NAME_CREATION_DATE));
+			return true;
+		}
+		if (ELEMENT_NAME_HSA_OBJECT.equals(tagName)) { // When we hit a <hsaUnit> tag
+			state.startRow = startElement.getLocation().getLineNumber();
+			state.entry = new HsaNode(state.startRow);
+			return true;
+		}
+		if (ELEMENT_NAME_DN.equals(tagName)) { // When we hit a <DN> tag
+			if (state.entry != null) {
+				state.entry.setDn(getCharactersToEndTag(eventReader, ELEMENT_NAME_DN));
+			}
+			return true;
+		}
+		if (ELEMENT_NAME_HSA_IDENTITY.equals(tagName)) { // When we hit a <hsaIdentity> tag
+			if (state.entry != null) {
+				state.entry.setHsaId(getCharactersToEndTag(eventReader, ELEMENT_NAME_HSA_IDENTITY));
+			}
+			return true;
+		}
+		if (ELEMENT_NAME_NAME.equals(tagName)) { // When we hit a <name> tag
+			if (state.entry != null) {
+				state.entry.setName(getCharactersToEndTag(eventReader, ELEMENT_NAME_NAME));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private void processEndElement(XMLEvent event, State state, HSAData hsaDataFromFile) {
+		EndElement endElement = event.asEndElement();
+		if (ELEMENT_NAME_HSA_OBJECT.equals(endElement.getName().getLocalPart())) {
+			if (state.entry != null && state.entry.isValid()) {
+				HsaNode previous = hsaDataFromFile.getCache().put(state.entry.getDn(), state.entry);
+				if (previous != null) {
+					throw new IllegalStateException("HsaObject entry invalid @ LineNo:" + state.startRow + ", Duplicate with: " + previous);
+				}
+			} else {
+				logError("HsaObject entry invalid @ LineNo:" + state.startRow + ", entry: " + state.entry);
+			}
+		}
 	}
 
 	private String getCharactersToEndTag(XMLEventReader eventReader, String endTagName) throws XMLStreamException {
@@ -191,11 +192,13 @@ public class HsaFileParser {
 
 	/**
 	 * Log errors
-	 * 
-	 * @param msg
 	 */
 	protected void logError(String msg) {
 		log.error(msg);
 	}
-	
+
+	private static final class State {
+		HsaNode entry = null;
+		long startRow = 0;
+	}
 }

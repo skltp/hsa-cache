@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Helper that prints a tree from a {@link HsaNode}
@@ -47,7 +47,7 @@ public class HsaNodePrinter {
 	/**
 	 * Cache for indentation Strings
 	 */
-	private final Map<Integer, String> cache = new HashMap<Integer,String>();
+	private final Map<Integer, String> cache = new HashMap<>();
 	
 	/**
 	 * Creates a printer instance
@@ -61,8 +61,7 @@ public class HsaNodePrinter {
 	}
 	
 	/**
-	 * Prints the thee to the {@link PrintWriter}
-	 * @param writer
+	 * Prints the tree to the {@link PrintWriter}
 	 */
 	public void printTree(final PrintWriter writer) {
 		doPrint(this.hsaNode, writer, 0);
@@ -90,12 +89,7 @@ public class HsaNodePrinter {
 	 * @return string representing the number of indents
 	 */
 	private String getIndent(int indent) {
-		String spaces = cache.get(indent);
-		if(spaces == null) {
-			spaces = StringUtils.repeat(" ", indent * indents);
-			cache.put(indent, spaces);		
-		}
-		return spaces;
+		return cache.computeIfAbsent(indent, k -> StringUtils.repeat(" ", indent * indents));
 	}
 
 }

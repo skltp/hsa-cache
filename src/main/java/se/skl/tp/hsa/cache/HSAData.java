@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class HSAData {
     public HSAData() {
-        cache = new HashMap<Dn, HsaNode>();
+        cache = new HashMap<>();
     }
 
     /**

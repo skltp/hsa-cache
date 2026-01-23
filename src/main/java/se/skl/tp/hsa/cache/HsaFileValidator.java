@@ -20,13 +20,15 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import org.apache.commons.cli.*;
+import org.apache.commons.cli.help.HelpFormatter;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
-
-import org.apache.commons.cli.*;
 
 /**
  * This class validates the XML file. The parameter warning level is used to set a 
@@ -40,12 +42,13 @@ import org.apache.commons.cli.*;
  * @author par.wenaker@callistaenterprise.se
  *
  */
+@SuppressWarnings("java:S106") // Console application
 public class HsaFileValidator {
 
 	private HsaFileValidator() {
 	}
 	
-	public static void main(String[] args) throws ParseException, FileNotFoundException {
+	public static void main(String[] args) throws ParseException, IOException {
 		
 		Options options = new Options();
 		options.addOption("f", true, "filename");
@@ -59,21 +62,18 @@ public class HsaFileValidator {
 		String filename    = cmd.getOptionValue("f");
 		String warning     = cmd.getOptionValue("w", "-1");
 		String outputFile  = cmd.getOptionValue("o");
-		
-		PrintWriter pw = getPrintWriter(outputFile);
-		
-		if(isEmpty(filename)) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp( "java " + HsaFileValidator.class.getName() , options );
+
+		if (isEmpty(filename)) {
+			HelpFormatter formatter = HelpFormatter.builder().get();
+			formatter.printHelp("java " + HsaFileValidator.class.getName(), null, options, null, false);
 			System.exit(-1);
-		}		
-		
-		HsaRelationBuilder relationBuilder = new HsaRelationBuilderWithLog(pw, Integer.parseInt(warning));
-		HsaFileParser fileParser = new HsaFileParserWithLog(pw);
-		
-		new HsaCacheImpl().init(filename, relationBuilder, fileParser);
-		
-		pw.close();
+		}
+		try (PrintWriter pw = getPrintWriter(outputFile)) {
+			HsaRelationBuilder relationBuilder = new HsaRelationBuilderWithLog(pw, Integer.parseInt(warning));
+			HsaFileParser fileParser = new HsaFileParserWithLog(pw);
+
+			new HsaCacheImpl().init(filename, relationBuilder, fileParser);
+		}
 	}
 
 	private static PrintWriter getPrintWriter(String outputFile) throws FileNotFoundException {

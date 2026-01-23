@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Class representing a DN (Distinguished Name)
@@ -47,18 +47,17 @@ public class Dn {
 	 */
 	Dn(String dn) {
 		StringTokenizer tok = new StringTokenizer(dn, ",");
-		List<String> parts = new ArrayList<String>(10);
+		List<String> dnParts = new ArrayList<>(10);
 		while(tok.hasMoreTokens()) {
-			parts.add(tok.nextToken().trim().intern());
+			dnParts.add(tok.nextToken().trim().intern());
 		}
-		this.parts = parts.toArray(new String[]{});
+		this.parts = dnParts.toArray(new String[]{});
 	}
 	
 	/**
 	 * Create a new Dn instance from parts
-	 * 
-	 * @param parts
-	 */
+	 *
+     */
 	private Dn(String [] parts) {
 		this.parts = parts;
 	}
@@ -108,9 +107,7 @@ public class Dn {
 		if (getClass() != obj.getClass())
 			return false;
 		Dn other = (Dn) obj;
-		if (!Arrays.equals(parts, other.parts))
-			return false;
-		return true;
-	}
+        return Arrays.equals(parts, other.parts);
+    }
 	
 }	

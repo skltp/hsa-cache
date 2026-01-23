@@ -25,20 +25,20 @@ import java.util.List;
 
 
 public interface HsaCache {
-	
+
+
 	/**
 	 * Default root for the HSA cache is SE.
 	 */
-	public static final String DEFAUL_ROOTNODE = "SE";
-
+	String DEFAULT_ROOTNODE = "SE";
 	/**
 	 * Date format
 	 */
-	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
-	
+	String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+
 	/**
 	 * Initialize the Cache. If the cache has a value before a call to this method, that state is 
-	 * retained in in case of an exception.
+	 * retained in case of an exception.
 	 * 
 	 * @param filenames file to initialize from
 	 * 
@@ -49,16 +49,14 @@ public interface HsaCache {
 	HsaCache init(String ... filenames) throws HsaCacheInitializationException;
 
     /**
-     * Free text search of the HSA tree. SEarch both HSA-ID and DN infomrmation.
-     * If the search text contains several words all must match either HSA-ID and DN infomrmation.
+     * Free text search of the HSA tree. Search both HSA-ID and DN information.
+     * If the search text contains several words all must match either HSA-ID and DN information.
      *
-     * @param searchText
      * @param maxNoOfHits, -1 means all...
-     * @return
      */
-    public List<HsaNodeInfo> freeTextSearch(String searchText, int maxNoOfHits);
+    List<HsaNodeInfo> freeTextSearch(String searchText, int maxNoOfHits);
 
-	public HsaNode getNode(String hsaId);
+	HsaNode getNode(String hsaId);
 
 	/**
 	 * Get the parent HSA-ID for a specific HSA-ID. If the HSA-ID is not found in 
