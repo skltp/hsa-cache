@@ -51,6 +51,7 @@ public class HsaRelationBuilderWithLog extends HsaRelationBuilder {
 	 * (non-Javadoc)
 	 * @see se.skl.tp.hsa.cache.HsaRelationBuilder#findParentDn(java.util.Map, se.skl.tp.hsa.cache.Dn)
 	 */
+	@Override
 	protected Dn findParentDn(final Map<Dn, HsaNode> nodes, Dn dn) {
 		Dn parentDn = dn.parentDn();
 		int levels = 1;

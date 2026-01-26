@@ -20,36 +20,46 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class HsaNodePrinterTest {
+@SuppressWarnings("UnnecessaryUnicodeEscape")
+class HsaNodePrinterTest {
 	
-	String expected = 
-			"dn=o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000004-1234,name=Landstinget i J\u00f6nk\u00f6ping,lineNo=48"+ System.getProperty("line.separator") +
-			"  dn=ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000003-1234,name=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,lineNo=43"+ System.getProperty("line.separator") +
-			"    dn=ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000002-1234,name=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,lineNo=38"+ System.getProperty("line.separator") +
-			"      dn=ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000000-1234,name=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,lineNo=33"+ System.getProperty("line.separator") +
-			"      dn=ou=N\u00e4ssj\u00f6 VC DLM,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000001-1234,name=N\u00e4ssj\u00f6 VC DLM,lineNo=28"+ System.getProperty("line.separator");
+	List<String> expectedRows = List.of(
+		"dn=o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000004-1234,name=Landstinget i J\u00f6nk\u00f6ping,lineNo=48",
+		"  dn=ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000003-1234,name=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,lineNo=43",
+		"    dn=ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000002-1234,name=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,lineNo=38"
+	);
+	Set<String> expectedUndefinedOrder = Set.of(
+		"      dn=ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000000-1234,name=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,lineNo=33",
+		"      dn=ou=N\u00e4ssj\u00f6 VC DLM,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE,hsaId=SE0000000001-1234,name=N\u00e4ssj\u00f6 VC DLM,lineNo=28");
 
-	
 	@Test
-	public void testPrint() throws Exception {
+	void testPrint() {
 		URL url = getClass().getClassLoader().getResource("simpleTest.xml");
-		HsaCacheImpl impl = (HsaCacheImpl)new HsaCacheImpl().init(url.getFile());
+        assertNotNull(url);
+        HsaCacheImpl impl = (HsaCacheImpl)new HsaCacheImpl().init(url.getFile());
 		
 		HsaNode topNode = impl.getNode("SE0000000004-1234");
 		
 		StringWriter sw = new StringWriter();
 		
 		new HsaNodePrinter(topNode,2).printTree(new PrintWriter(sw));
-		
-		assertEquals(expected, sw.toString());
-		
+
+		List<String> rows = List.of(sw.toString().split(System.lineSeparator()));
+		int expectedRowCount = expectedRows.size() + expectedUndefinedOrder.size();
+		assertEquals(expectedRowCount, rows.size());
+		assertEquals(expectedRows, rows.subList(0, expectedRows.size()));
+		assertEquals(expectedUndefinedOrder, new HashSet<>(rows.subList(expectedRows.size(), rows.size())));
 	}
 }

@@ -20,22 +20,20 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class HsaFileParserTest {
+@SuppressWarnings("UnnecessaryUnicodeEscape")
+class HsaFileParserTest {
 
 	@Test
-	public void testParseFile() throws Exception {
+	void testParseFile() throws Exception {
 		HsaFileParser parser = new HsaFileParser();
 		
 		InputStream is = getClass().getClassLoader().getResourceAsStream("simpleTest.xml");
@@ -74,7 +72,7 @@ public class HsaFileParserTest {
 	}
 
 	@Test
-	public void testParseDuplicateFile() throws Exception {
+	void testParseDuplicateFile() {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		
@@ -91,7 +89,7 @@ public class HsaFileParserTest {
 	}
 	
 	@Test
-	public void testInvalidEntry() throws Exception {		
+	void testInvalidEntry() throws Exception {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		
@@ -104,7 +102,7 @@ public class HsaFileParserTest {
 	}
 
 	@Test
-	public void testParseFileWithSpecialHtmlSigns() throws Exception {
+	void testParseFileWithSpecialHtmlSigns() throws Exception {
 		HsaFileParser parser = new HsaFileParser();
 		InputStream is = getClass().getClassLoader().getResourceAsStream("simpleTestSpecialHtmlSigns.xml");
 

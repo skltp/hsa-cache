@@ -20,6 +20,8 @@
  */
 package se.skl.tp.hsa.cache;
 
+import java.io.Serial;
+
 /**
  * Exception thrown if a specified HSA-ID cannot be found in the cache.
  * 
@@ -28,7 +30,8 @@ package se.skl.tp.hsa.cache;
  */
 public class HsaCacheNodeNotFoundException extends Exception {
 
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 2062040203257736888L;
 
 	public HsaCacheNodeNotFoundException(String message) {
 		super(message);

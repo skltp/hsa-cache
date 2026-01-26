@@ -32,7 +32,7 @@ public class HsaFileParserWithLog extends HsaFileParser {
 	/**
 	 * PrintWriter to use for printing errors
 	 */
-	private PrintWriter pw;
+	private final PrintWriter pw;
 
 	/**
 	 * Constructor

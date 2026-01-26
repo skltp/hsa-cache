@@ -20,32 +20,30 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-
 import java.lang.reflect.Field;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class DnTest {
+@SuppressWarnings("UnnecessaryUnicodeEscape")
+class DnTest {
 	
-	@Test
-	public void testEquals() throws Exception {
+	@SuppressWarnings({"EqualsWithItself", "AssertBetweenInconvertibleTypes"}) // For test purposes
+    @Test
+	void testEquals() {
 		Dn dn1 = new Dn("ou=N\u00e4ssj\u00f6 VC DLM,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");	
 		Dn dn2 = new Dn("ou=N\u00e4ssj\u00f6 VC DLM,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");		
-		Dn dn3 = new Dn("ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");		
-		
-		assertFalse(dn1.equals(null));
-		assertFalse(dn1.equals("Anything"));
-		assertFalse(dn1.equals(dn3));
-		assertEquals(dn1,dn1);
+		Dn dn3 = new Dn("ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");
+
+        assertNotEquals(null, dn1);
+        assertNotEquals("Anything", dn1);
+        assertNotEquals(dn1, dn3);
+        assertEquals(dn1,dn1);
 		assertEquals(dn1,dn2);
 	}
 
 	@Test
-	public void testStringIntern() throws Exception {
+	void testStringIntern() throws Exception {
 		Dn dn1 = new Dn("ou=N\u00e4ssj\u00f6 VC DLM,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");	
 		Dn dn2 = new Dn("ou=N\u00e4ssj\u00f6 VC DLM,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");		
 

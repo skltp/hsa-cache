@@ -20,31 +20,30 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.URL;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class HsaFileValidatorTest {
+class HsaFileValidatorTest {
 
 	@Test
-	public void testName() throws Exception {		
+	void testName() throws Exception {
 		URL url = getClass().getClassLoader().getResource("invalidTest.xml");
+		assertNotNull(url);
 		String [] args = new String[]{"-f", url.getFile(), "-w", "2", "-o", "target/output.txt"};
 		
 		HsaFileValidator.main(args);
 		
-		BufferedReader br = new BufferedReader(new FileReader("target/output.txt"));
-		
-		String line1, line2 = "";
-		try {
+		String line1;
+		String line2;
+		try (BufferedReader br = new BufferedReader(new FileReader("target/output.txt"))) {
 			line1 = br.readLine();
 			line2 = br.readLine();
-		} finally {
-			br.close();
 		}
 		
 		System.out.println(line1);

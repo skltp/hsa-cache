@@ -20,30 +20,32 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class SpringTest {
+import java.util.Objects;
 
-	@Before
-	public void before() {
-		System.setProperty("hsaFile1", getClass().getClassLoader().getResource("simpleTestPart1.xml").getFile());
-		System.setProperty("hsaFile2", getClass().getClassLoader().getResource("simpleTestPart2.xml").getFile());
+import static org.junit.jupiter.api.Assertions.*;
+
+class SpringTest {
+
+	@BeforeEach
+	void before() {
+		System.setProperty("hsaFile1", Objects.requireNonNull(getClass().getClassLoader().getResource("simpleTestPart1.xml")).getFile());
+		System.setProperty("hsaFile2", Objects.requireNonNull(getClass().getClassLoader().getResource("simpleTestPart2.xml")).getFile());
 	}
 	
-	public void after() {
+	@AfterEach
+	void after() {
 		System.clearProperty("hsaFile1");
 		System.clearProperty("hsaFile2");
 	}
 	
 	@Test
-	public void testSpringContext() throws Exception {	
+	void testSpringContext() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
 		
 		

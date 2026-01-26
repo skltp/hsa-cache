@@ -20,40 +20,40 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static se.skl.tp.hsa.cache.HsaCache.*;
 
 import java.net.URL;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-
-import org.junit.Test;
-
-public class HsaCacheImplTest {
+class HsaCacheImplTest {
 
 	@Test
-	public void testSimple() throws Exception {
-		URL url = getClass().getClassLoader().getResource("simpleTest.xml");
+	void testSimple() throws Exception {
+		URL url = getUrl("simpleTest.xml");
 
-		HsaCache impl = new HsaCacheImpl().init(url.getFile());
+		assertNotNull(url);
+        HsaCache impl = new HsaCacheImpl().init(url.getFile());
 				
 		assertEquals("SE0000000002-1234", impl.getParent("SE0000000000-1234"));
 		assertEquals("SE0000000002-1234", impl.getParent("SE0000000001-1234"));
 		assertEquals("SE0000000003-1234", impl.getParent("SE0000000002-1234"));
 		assertEquals("SE0000000004-1234", impl.getParent("SE0000000003-1234"));
-		assertEquals(DEFAUL_ROOTNODE, impl.getParent("SE0000000004-1234"));
+		assertEquals(DEFAULT_ROOTNODE, impl.getParent("SE0000000004-1234"));
 	
-		assertEquals(Arrays.asList(new String[]{"SE0000000003-1234"}), impl.getChildren("SE0000000004-1234"));
-		assertEquals(Arrays.asList(new String[]{"SE0000000002-1234"}), impl.getChildren("SE0000000003-1234"));
-		assertEquals(Arrays.asList(new String[]{"SE0000000000-1234","SE0000000001-1234"}), impl.getChildren("SE0000000002-1234"));
+		assertEquals(Set.of("SE0000000003-1234"), new HashSet<>(impl.getChildren("SE0000000004-1234")));
+		assertEquals(Set.of("SE0000000002-1234"), new HashSet<>(impl.getChildren("SE0000000003-1234")));
+		assertEquals(Set.of("SE0000000000-1234","SE0000000001-1234"), new HashSet<>(impl.getChildren("SE0000000002-1234")));
 	}
 	
 	@Test
-	public void testSimpleISO88591() throws Exception {
-		URL url = getClass().getClassLoader().getResource("simpleTest-ISO-8859-1.xml");
+	void testSimpleISO88591() throws Exception {
+		URL url = getUrl("simpleTest-ISO-8859-1.xml");
 
 		HsaCache impl = new HsaCacheImpl().init(url.getFile());
 				
@@ -61,32 +61,39 @@ public class HsaCacheImplTest {
 		assertEquals("SE0000000002-1234", impl.getParent("SE0000000001-1234"));
 		assertEquals("SE0000000003-1234", impl.getParent("SE0000000002-1234"));
 		assertEquals("SE0000000004-1234", impl.getParent("SE0000000003-1234"));
-		assertEquals(DEFAUL_ROOTNODE, impl.getParent("SE0000000004-1234"));
+		assertEquals(DEFAULT_ROOTNODE, impl.getParent("SE0000000004-1234"));
 	
-		assertEquals(Arrays.asList(new String[]{"SE0000000003-1234"}), impl.getChildren("SE0000000004-1234"));
-		assertEquals(Arrays.asList(new String[]{"SE0000000002-1234"}), impl.getChildren("SE0000000003-1234"));
+		assertEquals(List.of("SE0000000003-1234"), impl.getChildren("SE0000000004-1234"));
+		assertEquals(List.of("SE0000000002-1234"), impl.getChildren("SE0000000003-1234"));
 		List<String> children = impl.getChildren("SE0000000002-1234");
-		assertTrue(children.size() == 2);
+        assertEquals(2, children.size());
 		assertTrue(children.contains("SE0000000000-1234"));
 		assertTrue(children.contains("SE0000000001-1234"));
 	}
-	
+
+	@NonNull
+    private URL getUrl(String name) {
+		URL url = getClass().getClassLoader().getResource(name);
+		assertNotNull(url);
+		return url;
+	}
+
 	@Test
-	public void testReinitialize() throws Exception {
-		URL url = getClass().getClassLoader().getResource("simpleTestShort.xml");
+	void testReinitialize() {
+		URL url = getUrl("simpleTestShort.xml");
 		HsaCache impl = new HsaCacheImpl(url.getFile());
 		
 		assertEquals("SE0000000004-1234", impl.getParent("SE0000000001-1234"));
 		
-		url = getClass().getClassLoader().getResource("simpleTest.xml");
+		url = getUrl("simpleTest.xml");
 		impl.init(url.getFile());
 		
 		assertEquals("SE0000000002-1234", impl.getParent("SE0000000001-1234"));	
 	}
 	
 	@Test
-	public void testReinitializeFail() throws Exception {
-		URL url = getClass().getClassLoader().getResource("simpleTestShort.xml");
+	void testReinitializeFail() {
+		URL url = getUrl("simpleTestShort.xml");
 		HsaCache impl = new HsaCacheImpl(url.getFile());
 		
 		assertEquals("SE0000000004-1234", impl.getParent("SE0000000001-1234"));
@@ -100,23 +107,23 @@ public class HsaCacheImplTest {
 		assertEquals("SE0000000004-1234", impl.getParent("SE0000000001-1234"));
 	}
 	
-	@Test(expected=HsaCacheInitializationException.class)
-	public void testInvalid() throws Exception {
-		new HsaCacheImpl("notfound.xml");
+	@Test
+	void testInvalid() {
+		assertThrows(HsaCacheInitializationException.class, () -> new HsaCacheImpl("notfound.xml"));
 	}
 	
 	@Test
-	public void testNotInitializedGivesDefaultRoot() throws Exception {
+	void testNotInitializedGivesDefaultRoot() {
 		HsaCacheImpl impl = new HsaCacheImpl();
-		assertEquals(DEFAUL_ROOTNODE,impl.getParent("jabbadabba"));
+		assertEquals(DEFAULT_ROOTNODE,impl.getParent("jabbadabba"));
 	}
 	
 	@Test
-	public void defaultRootNodeReturnedWhenHsaIdNotFoundInCache() throws Exception {
+	void defaultRootNodeReturnedWhenHsaIdNotFoundInCache() {
 		HsaCacheImpl impl = new HsaCacheImpl();
-		URL url = getClass().getClassLoader().getResource("simpleTest.xml");
+		URL url = getUrl("simpleTest.xml");
 		impl.init(url.getFile());
-		
-		impl.getParent("jabbadabba");
+
+		assertEquals(DEFAULT_ROOTNODE, impl.getParent("jabbadabba"));
 	}
 }

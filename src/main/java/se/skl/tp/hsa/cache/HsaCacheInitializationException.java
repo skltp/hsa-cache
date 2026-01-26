@@ -20,6 +20,8 @@
  */
 package se.skl.tp.hsa.cache;
 
+import java.io.Serial;
+
 /**
  * Exception thrown if {@link HsaCache} cannot be initialized
  * 
@@ -27,7 +29,8 @@ package se.skl.tp.hsa.cache;
  *
  */
 public class HsaCacheInitializationException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = -6880587323381792871L;
 
 	public HsaCacheInitializationException(String message, Throwable cause) {
 		super(message, cause);

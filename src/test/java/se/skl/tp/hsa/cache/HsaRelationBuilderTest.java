@@ -20,20 +20,19 @@
  */
 package se.skl.tp.hsa.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class HsaRelationBuilderTest {
+@SuppressWarnings("UnnecessaryUnicodeEscape")
+class HsaRelationBuilderTest {
 
-	private static Dn [] dn = new Dn []{
+	private static final Dn [] dn = new Dn []{
 		new Dn("o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE"),
 		new Dn("ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE"),
 		new Dn("ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE"),
@@ -41,7 +40,7 @@ public class HsaRelationBuilderTest {
 		new Dn("ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE"),		
 	};
 	
-	private static String [] hsaId = new String [] {
+	private static final String [] hsaId = new String [] {
 		"SE0000000001-1234",
 		"SE0000000002-1234",
 		"SE0000000003-1234",
@@ -50,7 +49,7 @@ public class HsaRelationBuilderTest {
 	};
 	
 	@Test
-	public void testSetupRelations() throws Exception {
+	void testSetupRelations() {
 		Map<Dn, HsaNode> nodes = new HashMap<Dn, HsaNode>();
 		for(int i = 0; i < dn.length ; i++) {
 			nodes.put(dn[i], createHsaNode(dn[i].toString(),hsaId[i]));
@@ -61,8 +60,8 @@ public class HsaRelationBuilderTest {
 		HsaNode topNode = r.get(hsaId[0]);
 		
 		assertEquals(1, topNode.getChildren().size());
-		assertSame(r.get(hsaId[1]), topNode.getChildren().get(0));
-		assertSame(r.get(hsaId[2]), r.get(hsaId[1]).getChildren().get(0));
+		assertSame(r.get(hsaId[1]), topNode.getChildren().getFirst());
+		assertSame(r.get(hsaId[2]), r.get(hsaId[1]).getChildren().getFirst());
 		assertSame(r.get(hsaId[3]), r.get(hsaId[2]).getChildren().get(1));
 		assertSame(r.get(hsaId[4]), r.get(hsaId[2]).getChildren().get(0));
 	}
@@ -75,7 +74,7 @@ public class HsaRelationBuilderTest {
 	}
 	
 	@Test
-	public void testWarningLevelMinusOne() throws Exception {
+	void testWarningLevelMinusOne() {
 		Dn dn1 = new Dn("o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");
 		Dn dn2 = new Dn("ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");		
 		
@@ -94,7 +93,7 @@ public class HsaRelationBuilderTest {
 	}
 	
 	@Test
-	public void testWarningLevelOne() throws Exception {
+	void testWarningLevelOne() {
 		Dn dn1 = new Dn("o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");
 		Dn dn2 = new Dn("ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");		
 		
@@ -114,7 +113,7 @@ public class HsaRelationBuilderTest {
 	}
 	
 	@Test
-	public void testWarningLevelThree() throws Exception {
+	void testWarningLevelThree() {
 		Dn dn1 = new Dn("o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");
 		Dn dn2 = new Dn("ou=N\u00e4ssj\u00f6 VC DLK,ou=N\u00e4ssj\u00f6 Prim\u00e4rv\u00e5rdsomr\u00e5de,ou=H\u00f6glandets sjukv\u00e5rdsomr\u00e5de,o=Landstinget i J\u00f6nk\u00f6ping,l=VpW,c=SE");		
 		

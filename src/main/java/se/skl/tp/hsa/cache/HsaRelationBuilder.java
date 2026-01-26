@@ -20,21 +20,21 @@
  */
 package se.skl.tp.hsa.cache;
 
-/**
- * Builds relations between parent and children.
- * 
- * @author par.wenaker@callistaenterprise.se
- *
- */
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Builds relations between parent and children.
+ *
+ * @author par.wenaker@callistaenterprise.se
+ *
+ */
 public class HsaRelationBuilder {
 	
-	private static Logger log = LoggerFactory.getLogger(HsaRelationBuilder.class);
+	private static final Logger log = LoggerFactory.getLogger(HsaRelationBuilder.class);
 
 	/**
 	 * Processes a Map of {@link Dn} to {@link HsaNode} to a Map of String (HSA-ID) to {@link HsaNode}. All
@@ -104,7 +104,7 @@ public class HsaRelationBuilder {
 	 * @return Map of {@link String} to {@link HsaNode}
 	 */
 	protected Map<String,HsaNode> transform(Map<Dn, HsaNode> nodes) {
-		Map<String,HsaNode> result = new HashMap<String, HsaNode>();
+		Map<String,HsaNode> result = new HashMap<>();
 		for(Map.Entry<Dn, HsaNode> mapEntry : nodes.entrySet()) {
 			HsaNode entry = mapEntry.getValue();
 			HsaNode parent = mapEntry.getValue().getParent();
