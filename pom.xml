@@ -9,7 +9,7 @@
   <scm>
     <connection>scm:git:https://github.com/skltp/hsa-cache.git</connection>
     <developerConnection>scm:git:https://github.com/skltp/hsa-cache.git</developerConnection>
-    <url>http://github.com/skltp/hsa-cache</url>
+    <url>https://github.com/skltp/hsa-cache</url>
   </scm>
 
   <distributionManagement>
@@ -33,21 +33,23 @@
     <doclint>none</doclint>
     <additionalparam>-Xdoclint:none</additionalparam>
 
+    <!-- TODO: REGULARLY CHECK CURRENTNESS OF DEPS -#- DEPENDENCY CURRENTNESS LAST CHECKED: APR 2026. -->
+
     <!-- Plugins -->
-    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
-    <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
-    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-    <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
+    <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version> <!-- FEB 2026 -->
+    <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version> <!-- NOV 2025. Latest as of APR 2026. -->
+    <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version> <!-- FEB 2026 -->
+    <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version> <!-- DEC 2025. Latest as of APR 2026. -->
 
     <!-- Dependencies -->
-    <spring-framework.version>6.2.15</spring-framework.version>
-    <commons-cli.version>1.11.0</commons-cli.version>
-    <commons-lang.version>3.20.0</commons-lang.version>
-    <slf4j.version>2.0.17</slf4j.version>
+    <spring-framework.version>6.2.17</spring-framework.version> <!-- MAR 2026 -->
+    <commons-cli.version>1.11.0</commons-cli.version> <!-- NOV 2025. Latest as of APR 2026. -->
+    <commons-lang.version>3.20.0</commons-lang.version> <!-- NOV 2025. Latest as of APR 2026. -->
+    <slf4j.version>2.0.17</slf4j.version> <!-- FEB 2025. Latest as of APR 2026. -->
 
     <!-- Test dependencies -->
-    <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
-    <junit.jupiter.version>5.10.2</junit.jupiter.version>
+    <jacoco.plugin.version>0.8.14</jacoco.plugin.version> <!-- OCT 2025. Latest as of APR 2026. -->
+    <junit.jupiter.version>5.14.3</junit.jupiter.version> <!-- FEB 2026 -->
   </properties>
 
   <dependencyManagement>
@@ -76,11 +78,17 @@
       <artifactId>commons-lang3</artifactId>
       <version>${commons-lang.version}</version>
     </dependency>
+
+    <!-- LOGGING API -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
+
+    <!-- Everything below is only pulled in during the test scope, to run tests,
+         and are not included with the library artifacts -->
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
