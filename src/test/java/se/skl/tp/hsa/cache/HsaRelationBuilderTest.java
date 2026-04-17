@@ -60,8 +60,8 @@ class HsaRelationBuilderTest {
 		HsaNode topNode = r.get(hsaId[0]);
 		
 		assertEquals(1, topNode.getChildren().size());
-		assertSame(r.get(hsaId[1]), topNode.getChildren().getFirst());
-		assertSame(r.get(hsaId[2]), r.get(hsaId[1]).getChildren().getFirst());
+		assertSame(r.get(hsaId[1]), topNode.getChildren().get(0));
+		assertSame(r.get(hsaId[2]), r.get(hsaId[1]).getChildren().get(0));
 		assertSame(r.get(hsaId[3]), r.get(hsaId[2]).getChildren().get(1));
 		assertSame(r.get(hsaId[4]), r.get(hsaId[2]).getChildren().get(0));
 	}

@@ -61,7 +61,7 @@ class HsaCacheSearchImplTest {
         List<HsaNodeInfo> list = impl.freeTextSearch(hsaId, -1);
 
         assertEquals(1, list.size());
-        assertEquals(hsaId, list.getFirst().getHsaId());
+        assertEquals(hsaId, list.get(0).getHsaId());
     }
 
     /**
@@ -74,7 +74,7 @@ class HsaCacheSearchImplTest {
         List<HsaNodeInfo> list = impl.freeTextSearch(vc, -1);
 
         assertEquals(1, list.size());
-        assertTrue(Strings.CI.contains(list.getFirst().getDn(), vc));
+        assertTrue(Strings.CI.contains(list.get(0).getDn(), vc));
     }
 
     /**
@@ -86,7 +86,7 @@ class HsaCacheSearchImplTest {
         List<HsaNodeInfo> list = impl.freeTextSearch(name, -1);
 
         assertEquals(1, list.size());
-        assertEquals(name, list.getFirst().getName());
+        assertEquals(name, list.get(0).getName());
     }
 
     /**
@@ -98,7 +98,7 @@ class HsaCacheSearchImplTest {
         List<HsaNodeInfo> list = impl.freeTextSearch(name, -1);
 
         assertEquals(1, list.size());
-        assertEquals(name.toUpperCase(), list.getFirst().getName());
+        assertEquals(name.toUpperCase(), list.get(0).getName());
     }
     
     /**
